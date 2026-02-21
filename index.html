@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kalkulator HPP & Harga Jual</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        padding: 20px;
+      }
+      .container {
+        max-width: 500px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 5px;
+      }
+      .subtitle {
+        text-align: center;
+        font-size: 14px;
+        color: #7f8c8d;
+        margin-bottom: 25px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+        font-size: 14px;
+      }
+      .help-text {
+        font-weight: normal;
+        font-size: 12px;
+        color: #7f8c8d;
+      }
+      input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #bdc3c7;
+        border-radius: 5px;
+        box-sizing: border-box;
+        font-size: 16px;
+      }
+      button {
+        width: 100%;
+        padding: 12px;
+        background: #27ae60;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        margin-top: 10px;
+      }
+      button:hover {
+        background: #2ecc71;
+      }
+      .result {
+        margin-top: 25px;
+        padding: 15px;
+        background: #e8f8f5;
+        border-left: 5px solid #27ae60;
+        border-radius: 5px;
+        display: none;
+      }
+      .result p {
+        margin: 8px 0;
+        font-size: 15px;
+        display: flex;
+        justify-content: space-between;
+      }
+      .highlight {
+        font-weight: bold;
+        color: #c0392b;
+        font-size: 18px;
+        border-top: 2px dashed #bdc3c7;
+        padding-top: 10px;
+        margin-top: 10px;
+      }
+      .hpp-total {
+        font-weight: bold;
+        color: #2980b9;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Kalkulator HPP Cerdas</h2>
+      <div class="subtitle">Hitung modal aslimu biar nggak jual rugi!</div>
+
+      <div class="form-group">
+        <label>1. Total Beli Bahan Baku (Rp) <br /><span class="help-text">Misal: Beli garam 1 karung Rp 100.000</span></label>
+        <input type="number" id="hargaBahan" placeholder="100000" />
+      </div>
+
+      <div class="form-group">
+        <label>2. Total Hasil Repack (Pcs) <br /><span class="help-text">Misal: Dari 1 karung dipacking jadi 50 bungkus</span></label>
+        <input type="number" id="qty" placeholder="50" />
+      </div>
+
+      <div class="form-group">
+        <label>3. Biaya Kemasan per Pcs (Rp) <br /><span class="help-text">Modal plastik, lakban, stiker per bungkusnya</span></label>
+        <input type="number" id="kemasan" placeholder="250" />
+      </div>
+
+      <div class="form-group">
+        <label>4. Biaya Tenaga & Operasional Total (Rp) <br /><span class="help-text">Bensin kulakan, kuli angkut, ongkos nimbang</span></label>
+        <input type="number" id="operasional" placeholder="25000" />
+      </div>
+
+      <div class="form-group">
+        <label>5. Target Keuntungan (%) <br /><span class="help-text">Mau ambil margin berapa persen dari HPP?</span></label>
+        <input type="number" id="margin" placeholder="30" />
+      </div>
+
+      <button onclick="hitung()">Hitung Harga Jual</button>
+
+      <div class="result" id="hasilBox">
+        <h3 style="margin-top: 0; color: #2c3e50">Rincian Modal (Per Pcs):</h3>
+        <p><span>Bahan Baku:</span> <span id="outBahan">0</span></p>
+        <p><span>Kemasan:</span> <span id="outKemasan">0</span></p>
+        <p><span>Tenaga & Operasional:</span> <span id="outOps">0</span></p>
+
+        <p class="hpp-total">
+          <span>Total HPP per Pcs:</span> <span>Rp <span id="outHPP">0</span></span>
+        </p>
+        <p>
+          <span>Target Profit (<span id="outMarginText">0</span>%):</span> <span>Rp <span id="outProfit">0</span></span>
+        </p>
+
+        <p class="highlight">
+          <span>Harga Jual Ideal:</span> <span>Rp <span id="outHargaJual">0</span></span>
+        </p>
+      </div>
+    </div>
+
+    <script>
+      function hitung() {
+        // Ambil nilai dari input, kalau kosong anggap 0
+        const hargaBahan = parseFloat(document.getElementById("hargaBahan").value) || 0;
+        const qty = parseFloat(document.getElementById("qty").value) || 1; // Jangan sampai dibagi 0
+        const kemasan = parseFloat(document.getElementById("kemasan").value) || 0;
+        const operasional = parseFloat(document.getElementById("operasional").value) || 0;
+        const margin = parseFloat(document.getElementById("margin").value) || 0;
+
+        // Logika Matematika HPP
+        const bahanPerPcs = hargaBahan / qty;
+        const opsPerPcs = operasional / qty;
+
+        // HPP = Modal murni barang sampai siap jual
+        const hpp = bahanPerPcs + kemasan + opsPerPcs;
+
+        // Hitung Profit & Harga Jual dengan sistem Markup
+        const profit = hpp * (margin / 100);
+        const hargaJual = hpp + profit;
+
+        // Format angka jadi Rupiah (titik ribuan)
+        const formatRp = (angka) => Math.round(angka).toLocaleString("id-ID");
+
+        // Lempar hasil ke HTML
+        document.getElementById("outBahan").innerText = "Rp " + formatRp(bahanPerPcs);
+        document.getElementById("outKemasan").innerText = "Rp " + formatRp(kemasan);
+        document.getElementById("outOps").innerText = "Rp " + formatRp(opsPerPcs);
+        document.getElementById("outHPP").innerText = formatRp(hpp);
+        document.getElementById("outMarginText").innerText = margin;
+        document.getElementById("outProfit").innerText = formatRp(profit);
+        document.getElementById("outHargaJual").innerText = formatRp(hargaJual);
+
+        // Tampilkan kotak hasil
+        document.getElementById("hasilBox").style.display = "block";
+      }
+    </script>
+  </body>
+</html>
